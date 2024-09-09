@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import { FiUploadCloud } from "react-icons/fi"
-import { useSelector } from "react-redux"
 
 import "video-react/dist/video-react.css"
 import { Player } from "video-react"
@@ -9,14 +8,15 @@ import { Player } from "video-react"
 export default function Upload({
   name,
   label,
+  subSectionType,
   register,
   setValue,
   errors,
-  video = false,
   viewData = null,
   editData = null,
+  fileName = null,
+  setFileName = null
 }) {
-  const { course } = useSelector((state) => state.course)
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewSource, setPreviewSource] = useState(
     viewData ? viewData : editData ? editData : ""
@@ -28,18 +28,18 @@ export default function Upload({
     if (file) {
       previewFile(file)
       setSelectedFile(file)
+      setFileName(file.name) // Store the file name
     }
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: !video
+    accept: !subSectionType
       ? { "image/*": [".jpeg", ".jpg", ".png"] }
-      : { "video/*": [".mp4"] },
+      : subSectionType === "video" ? { "video/*": [".mp4"] } : { "application/pdf": [".pdf"] },
     onDrop,
   })
 
   const previewFile = (file) => {
-    // console.log(file)
     const reader = new FileReader()
     reader.readAsDataURL(file)
     reader.onloadend = () => {
@@ -63,27 +63,29 @@ export default function Upload({
         {label} {!viewData && <sup className="text-pink-200">*</sup>}
       </label>
       <div
-        className={`${
-          isDragActive ? "bg-richblack-600" : "bg-richblack-700"
-        } flex min-h-[250px] cursor-pointer items-center justify-center rounded-md border-2 border-dotted border-richblack-500`}
+        className={`${isDragActive ? "bg-richblack-600" : "bg-richblack-700"} flex min-h-[250px] cursor-pointer items-center justify-center rounded-md border-2 border-dotted border-richblack-500`}
       >
         {previewSource ? (
           <div className="flex w-full flex-col p-6">
-            {!video ? (
+            {!subSectionType ? (
               <img
                 src={previewSource}
                 alt="Preview"
                 className="h-full w-full rounded-md object-cover"
               />
-            ) : (
+            ) : subSectionType === "video" ? (
               <Player aspectRatio="16:9" playsInline src={previewSource} />
+            ) : (
+              <p className="mt-2 text-sm text-center text-richblack-200">Uploaded PDF File: {fileName}</p>
             )}
+            {/* Display the file name */}
             {!viewData && (
               <button
                 type="button"
                 onClick={() => {
                   setPreviewSource("")
                   setSelectedFile(null)
+                  setFileName("") // Reset file name
                   setValue(name, null)
                 }}
                 className="mt-3 text-richblack-400 underline"
@@ -102,13 +104,25 @@ export default function Upload({
               <FiUploadCloud className="text-2xl text-yellow-50" />
             </div>
             <p className="mt-2 max-w-[200px] text-center text-sm text-richblack-200">
-              Drag and drop an {!video ? "image" : "video"}, or click to{" "}
+              Drag and drop {!subSectionType ? "an image" : subSectionType === "video" ? "a video" : "a pdf"}, or click to{" "}
               <span className="font-semibold text-yellow-50">Browse</span> a
               file
             </p>
             <ul className="mt-10 flex list-disc justify-between space-x-12 text-center  text-xs text-richblack-200">
-              <li>Aspect ratio 16:9</li>
-              <li>Recommended size 1024x576</li>
+              {subSectionType === "video" && (
+                <>
+                  <li>Aspect ratio 16:9</li>
+                  <li>Recommended size 1024x576</li>
+                </>
+              )}
+              <li>
+                Size limit:{" "}
+                {subSectionType
+                  ? subSectionType === "video"
+                    ? "100 MB"
+                    : "10 MB"
+                  : "10 MB"}
+              </li>
             </ul>
           </div>
         )}

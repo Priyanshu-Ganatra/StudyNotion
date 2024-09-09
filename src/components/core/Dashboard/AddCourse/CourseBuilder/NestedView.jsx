@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { AiFillCaretDown } from "react-icons/ai"
+import { IoVideocamOutline } from "react-icons/io5";
+import { BsFiletypePdf } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa"
 import { MdEdit } from "react-icons/md"
 import { RiDeleteBin6Line } from "react-icons/ri"
@@ -24,8 +26,10 @@ export default function NestedView({ handleChangeEditSectionName }) {
   const [editSubSection, setEditSubSection] = useState(null)
   // to keep track of confirmation modal
   const [confirmationModal, setConfirmationModal] = useState(null)
+  // type of subsection
+  const [subSectionType, setSubSectionType] = useState("")
 
-  const handleDeleleSection = async (sectionId) => {
+  const handleDeleteSection = async (sectionId) => {
     const result = await deleteSection({
       sectionId,
       courseId: course._id,
@@ -38,7 +42,7 @@ export default function NestedView({ handleChangeEditSectionName }) {
   }
 
   const handleDeleteSubSection = async (subSectionId, sectionId) => {
-    const result = await deleteSubSection({ subSectionId, sectionId, token })
+    const result = await deleteSubSection({ subSectionId, sectionId, subSectionType }, token)
     if (result) {
       // update the structure of course
       const updatedCourseContent = course.courseContent.map((section) =>
@@ -85,7 +89,7 @@ export default function NestedView({ handleChangeEditSectionName }) {
                       text2: "All the lectures in this section will be deleted",
                       btn1Text: "Delete",
                       btn2Text: "Cancel",
-                      btn1Handler: () => handleDeleleSection(section._id),
+                      btn1Handler: () => handleDeleteSection(section._id),
                       btn2Handler: () => setConfirmationModal(null),
                     })
                   }
@@ -97,6 +101,7 @@ export default function NestedView({ handleChangeEditSectionName }) {
               </div>
             </summary>
             <div className="px-6 pb-4">
+
               {/* Render All Sub Sections Within a Section */}
               {section.subSection.map((data) => (
                 <div
@@ -105,7 +110,7 @@ export default function NestedView({ handleChangeEditSectionName }) {
                   className="flex cursor-pointer items-center justify-between gap-x-3 border-b-2 border-b-richblack-600 py-2"
                 >
                   <div className="flex items-center gap-x-3 py-2 ">
-                    <RxDropdownMenu className="text-2xl text-richblack-50" />
+                    {data.type === "video" ? <IoVideocamOutline className="text-2xl text-richblack-50" /> : <BsFiletypePdf className="text-xl text-richblack-50" />}
                     <p className="font-semibold text-richblack-50">
                       {data.title}
                     </p>
@@ -141,31 +146,48 @@ export default function NestedView({ handleChangeEditSectionName }) {
               ))}
               {/* Add New Lecture to Section */}
               <button
-                onClick={() => setAddSubsection(section._id)}
+                onClick={() => {
+                  setSubSectionType("video");
+                  setAddSubsection(section._id);
+                }}
                 className="mt-3 flex items-center gap-x-1 text-yellow-50"
               >
                 <FaPlus className="text-lg" />
-                <p>Add Lecture</p>
+                <p>Add Lecture Video</p>
+              </button>
+              <button
+                onClick={() => {
+                  setSubSectionType("pdf");
+                  setAddSubsection(section._id);
+                }}
+                className="mt-3 flex items-center gap-x-1 text-yellow-50"
+              >
+                <FaPlus className="text-lg" />
+                <p>Add PDF File</p>
               </button>
             </div>
           </details>
         ))}
       </div>
+
       {/* Modal Display */}
       {addSubSection ? (
         <SubSectionModal
+          subSectionType={subSectionType}
           modalData={addSubSection}
           setModalData={setAddSubsection}
           add={true}
         />
       ) : viewSubSection ? (
         <SubSectionModal
+          subSectionType={subSectionType}
           modalData={viewSubSection}
           setModalData={setViewSubSection}
           view={true}
         />
       ) : editSubSection ? (
         <SubSectionModal
+          subSectionType={subSectionType}
           modalData={editSubSection}
           setModalData={setEditSubSection}
           edit={true}
@@ -173,6 +195,7 @@ export default function NestedView({ handleChangeEditSectionName }) {
       ) : (
         <></>
       )}
+
       {/* Confirmation Modal */}
       {confirmationModal ? (
         <ConfirmationModal modalData={confirmationModal} />

@@ -5,6 +5,9 @@ const SubSectionSchema = new mongoose.Schema({
 	timeDuration: { type: String },
 	description: { type: String },
 	videoUrl: { type: String },
+	pdfUrl: { type: String },
+	fileName: { type: String },
+	type: { type: String, enum: ["video", "pdf"] },
 });
 
 module.exports = mongoose.model("SubSection", SubSectionSchema);

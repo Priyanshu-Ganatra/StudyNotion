@@ -88,7 +88,7 @@ export default function CourseBuilderForm() {
     if (
       course.courseContent.some((section) => section.subSection.length === 0)
     ) {
-      toast.error("Please add atleast one lecture in each section")
+      toast.error("Each section must have a video/pdf")
       return
     }
     dispatch(setStep(3))

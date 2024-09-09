@@ -28,7 +28,7 @@ function CourseDetails() {
   const { courseId } = useParams()
   // console.log(`course id: ${courseId}`)
 
-  // Declear a state to save the course details
+  // Declarw a state to save the course details
   const [response, setResponse] = useState(null)
   const [confirmationModal, setConfirmationModal] = useState(null)
   useEffect(() => {
@@ -88,7 +88,7 @@ function CourseDetails() {
   }
 
   const {
-    _id: course_id,
+    // _id: course_id,
     courseName,
     courseDescription,
     thumbnail,

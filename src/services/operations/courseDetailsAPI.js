@@ -148,18 +148,18 @@ export const createSection = async (data, token) => {
 }
 
 // create a subsection
-export const createSubSection = async (data, token) => {
+export const createSubSection = async (data, token, subSectionType) => {
   let result = null
   const toastId = toast.loading("Loading...")
   try {
     const response = await apiConnector("POST", CREATE_SUBSECTION_API, data, {
       Authorization: `Bearer ${token}`,
     })
-    console.log("CREATE SUB-SECTION API RESPONSE............", response)
+    // console.log("CREATE SUB-SECTION API RESPONSE............", response)
     if (!response?.data?.success) {
       throw new Error("Could Not Add Lecture")
     }
-    toast.success("Lecture Added")
+    toast.success(`${subSectionType === "video" ? "Lecture" : "PDF"} Added`)
     result = response?.data?.data
   } catch (error) {
     console.log("CREATE SUB-SECTION API ERROR............", error)
@@ -192,7 +192,7 @@ export const updateSection = async (data, token) => {
 }
 
 // update a subsection
-export const updateSubSection = async (data, token) => {
+export const updateSubSection = async (data, token, subSectionType) => {
   let result = null
   const toastId = toast.loading("Loading...")
   try {
@@ -201,9 +201,9 @@ export const updateSubSection = async (data, token) => {
     })
     console.log("UPDATE SUB-SECTION API RESPONSE............", response)
     if (!response?.data?.success) {
-      throw new Error("Could Not Update Lecture")
+      throw new Error("Could Not Update Lecture/PDF")
     }
-    toast.success("Lecture Updated")
+    toast.success(`${subSectionType === 'video' ? 'Lecture Details' : 'PDF Details'} Updated`)
     result = response?.data?.data
   } catch (error) {
     console.log("UPDATE SUB-SECTION API ERROR............", error)
@@ -234,6 +234,7 @@ export const deleteSection = async (data, token) => {
   toast.dismiss(toastId)
   return result
 }
+
 // delete a subsection
 export const deleteSubSection = async (data, token) => {
   let result = null
@@ -246,7 +247,7 @@ export const deleteSubSection = async (data, token) => {
     if (!response?.data?.success) {
       throw new Error("Could Not Delete Lecture")
     }
-    toast.success("Lecture Deleted")
+    toast.success(`${data.subSectionType === 'video' ? 'Lecture' : 'PDF'} Deleted`)
     result = response?.data?.data
   } catch (error) {
     console.log("DELETE SUB-SECTION API ERROR............", error)
