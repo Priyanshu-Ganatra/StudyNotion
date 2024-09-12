@@ -8,6 +8,29 @@ const CourseProgress = require("../models/CourseProgress")
 const { convertSecondsToDuration } = require("../utils/secToDuration")
 const RatingandReview = require("../models/RatingandReview")
 
+exports.getAllCoursesPopulated = async (req, res) => {
+  try {
+    const allCourses = await Course.find().populate('instructor').populate({
+      path: 'courseContent',
+      populate: {
+        path: 'subSection'
+      }
+    }).exec()
+
+    return res.status(200).json({
+      success: true,
+      data: allCourses,
+    })
+  } catch (error) {
+    console.log(error)
+    return res.status(404).json({
+      success: false,
+      message: `Can't Fetch Courses Data`,
+      error: error.message,
+    })
+  }
+}
+
 // Function to create a new course
 exports.createCourse = async (req, res) => {
   try {
