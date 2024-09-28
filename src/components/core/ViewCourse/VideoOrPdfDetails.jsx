@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 
 import "video-react/dist/video-react.css"
 import { useLocation } from "react-router-dom"
@@ -20,13 +21,13 @@ const VideoDetails = () => {
   const { courseSectionData, courseEntireData, completedLectures } =
     useSelector((state) => state.viewCourse)
 
-  const [videoData, setVideoData] = useState([])
+  const [videoOrPdfData, setVideoOrPdfData] = useState([])
   const [previewSource, setPreviewSource] = useState("")
   const [videoEnded, setVideoEnded] = useState(false)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       if (!courseSectionData.length) return
       if (!courseId && !sectionId && !subSectionId) {
         navigate(`/dashboard/enrolled-courses`)
@@ -36,11 +37,11 @@ const VideoDetails = () => {
           (course) => course._id === sectionId
         )
         // console.log("filteredData", filteredData)
-        const filteredVideoData = filteredData?.[0]?.subSection.filter(
+        const filteredPdfOrVideoOrPdfData = filteredData?.[0]?.subSection.filter(
           (data) => data._id === subSectionId
         )
-        // console.log("filteredVideoData", filteredVideoData)
-        setVideoData(filteredVideoData[0])
+        // console.log("filteredPdfOrVideoOrPdfData", filteredPdfOrVideoOrPdfData)
+        setVideoOrPdfData(filteredPdfOrVideoOrPdfData[0])
         setPreviewSource(courseEntireData.thumbnail)
         setVideoEnded(false)
       }
@@ -48,7 +49,7 @@ const VideoDetails = () => {
   }, [courseSectionData, courseEntireData, location.pathname])
 
   // check if the lecture is the first video of the course
-  const isFirstVideo = () => {
+  const isFirstVideoOrPdf = () => {
     const currentSectionIndx = courseSectionData.findIndex(
       (data) => data._id === sectionId
     )
@@ -65,7 +66,7 @@ const VideoDetails = () => {
   }
 
   // go to the next video
-  const goToNextVideo = () => {
+  const goToNextVideoOrPdf = () => {
     // console.log(courseSectionData)
 
     const currentSectionIndx = courseSectionData.findIndex(
@@ -100,7 +101,7 @@ const VideoDetails = () => {
   }
 
   // check if the lecture is the last video of the course
-  const isLastVideo = () => {
+  const isLastVideoOrPdf = () => {
     const currentSectionIndx = courseSectionData.findIndex(
       (data) => data._id === sectionId
     )
@@ -123,7 +124,7 @@ const VideoDetails = () => {
   }
 
   // go to the previous video
-  const goToPrevVideo = () => {
+  const goToPrevVideoOrPdf = () => {
     // console.log(courseSectionData)
 
     const currentSectionIndx = courseSectionData.findIndex(
@@ -170,77 +171,92 @@ const VideoDetails = () => {
 
   return (
     <div className="flex flex-col gap-5 text-white">
-      {!videoData ? (
+      {!videoOrPdfData ? (
         <img
           src={previewSource}
           alt="Preview"
           className="h-full w-full rounded-md object-cover"
         />
       ) : (
-        <Player
-          ref={playerRef}
-          aspectRatio="16:9"
-          playsInline
-          onEnded={() => setVideoEnded(true)}
-          src={videoData?.videoUrl}
-        >
-          <BigPlayButton position="center" />
-          {/* Render When Video Ends */}
-          {videoEnded && (
-            <div
-              style={{
-                backgroundImage:
-                  "linear-gradient(to top, rgb(0, 0, 0), rgba(0,0,0,0.7), rgba(0,0,0,0.5), rgba(0,0,0,0.1)",
-              }}
-              className="full absolute inset-0 z-[100] grid h-full place-content-center font-inter"
-            >
-              {!completedLectures.includes(subSectionId) && (
+        videoOrPdfData?.type === 'pdf' ?
+          <div className="flex gap-4">
+            <IconBtn
+              disabled={loading}
+              text={!loading ? "View PDF" : "Loading..."}
+              customClasses="mt-8"
+              onclick={() => window.open(videoOrPdfData.pdfUrl, '_blank')}
+            />
+            <IconBtn
+              disabled={loading}
+              onclick={() => handleLectureCompletion()}
+              text={!loading ? "Mark As Read" : "Loading..."}
+              customClasses="mt-8"
+            />
+          </div> :
+          <Player
+            ref={playerRef}
+            aspectRatio="16:9"
+            playsInline
+            onEnded={() => setVideoEnded(true)}
+            src={videoOrPdfData?.videoUrl}
+          >
+            <BigPlayButton position="center" />
+            {/* Render When Video Ends */}
+            {videoEnded && (
+              <div
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to top, rgb(0, 0, 0), rgba(0,0,0,0.7), rgba(0,0,0,0.5), rgba(0,0,0,0.1)",
+                }}
+                className="full absolute inset-0 z-[100] grid h-full place-content-center font-inter"
+              >
+                {!completedLectures.includes(subSectionId) && (
+                  <IconBtn
+                    disabled={loading}
+                    onclick={() => handleLectureCompletion()}
+                    text={!loading ? "Mark As Completed" : "Loading..."}
+                    customClasses="text-xl max-w-max px-4 mx-auto"
+                  />
+                )}
                 <IconBtn
                   disabled={loading}
-                  onclick={() => handleLectureCompletion()}
-                  text={!loading ? "Mark As Completed" : "Loading..."}
-                  customClasses="text-xl max-w-max px-4 mx-auto"
+                  onclick={() => {
+                    if (playerRef?.current) {
+                      // set the current time of the video to 0
+                      playerRef?.current?.seek(0)
+                      setVideoEnded(false)
+                    }
+                  }}
+                  text="Rewatch"
+                  customClasses="text-xl max-w-max px-4 mx-auto mt-2"
                 />
-              )}
-              <IconBtn
-                disabled={loading}
-                onclick={() => {
-                  if (playerRef?.current) {
-                    // set the current time of the video to 0
-                    playerRef?.current?.seek(0)
-                    setVideoEnded(false)
-                  }
-                }}
-                text="Rewatch"
-                customClasses="text-xl max-w-max px-4 mx-auto mt-2"
-              />
-              <div className="mt-10 flex min-w-[250px] justify-center gap-x-4 text-xl">
-                {!isFirstVideo() && (
-                  <button
-                    disabled={loading}
-                    onClick={goToPrevVideo}
-                    className="blackButton"
-                  >
-                    Prev
-                  </button>
-                )}
-                {!isLastVideo() && (
-                  <button
-                    disabled={loading}
-                    onClick={goToNextVideo}
-                    className="blackButton"
-                  >
-                    Next
-                  </button>
-                )}
+                <div className="mt-10 flex min-w-[250px] justify-center gap-x-4 text-xl">
+                  {!isFirstVideoOrPdf() && (
+                    <button
+                      disabled={loading}
+                      onClick={goToPrevVideoOrPdf}
+                      className="blackButton"
+                    >
+                      Prev
+                    </button>
+                  )}
+                  {!isLastVideoOrPdf() && (
+                    <button
+                      disabled={loading}
+                      onClick={goToNextVideoOrPdf}
+                      className="blackButton"
+                    >
+                      Next
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </Player>
+            )}
+          </Player>
       )}
 
-      <h1 className="mt-4 text-3xl font-semibold">{videoData?.title}</h1>
-      <p className="pt-2 pb-6">{videoData?.description}</p>
+      <h1 className="mt-4 text-3xl font-semibold">{videoOrPdfData?.title}</h1>
+      <p className="pt-2 pb-6">{videoOrPdfData?.description}</p>
     </div>
   )
 }
