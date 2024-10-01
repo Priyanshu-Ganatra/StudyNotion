@@ -35,12 +35,13 @@ const ChatBotModal = ({ isChatbotVisible }) => {
         type: 'bot',
         content: data.generated_theory,
         papers: data.arxiv_papers,
-        links: data.google_search_results
+        links: data.google_search_results,
+        dataVisualization: data.data_visualization
       }
       setMessages(prev => [...prev, botMessage])
     } catch (error) {
       console.error('Error:', error)
-      setMessages(prev => [...prev, { type: 'bot', content: 'Sorry, I encountered an error. Please try again later.' }])
+      setMessages(prev => [...prev, { type: 'bot', content: 'Sorry, I encountered an error. Please try again.' }])
     } finally {
       setIsLoading(false)
     }
@@ -51,7 +52,7 @@ const ChatBotModal = ({ isChatbotVisible }) => {
       <div className="w-full h-full flex flex-col p-4">
         <div className="mb-4">
           <h2 className="text-2xl font-bold">StudyNotion Chatbot</h2>
-          <p className="text-gray-600">Ask me anything about your course, I'm here to resolve your doubts!</p>
+          <p className="text-gray-600">Ask me anything about your course! I'm here to resolve your doubts.</p>
         </div>
         <div className="flex-grow overflow-auto mb-4" ref={scrollAreaRef}>
           {messages.map((message, index) => (
@@ -70,6 +71,12 @@ const ChatBotModal = ({ isChatbotVisible }) => {
                       <a href={paper.Link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Read More</a>
                     </div>
                   ))}
+                </div>
+              )}
+              {message.dataVisualization && (
+                <div className="mt-4">
+                  <h3 className="font-bold">Data Visualization:</h3>
+                  <img src={message.dataVisualization} alt="Data Visualization" className="mt-2 max-w-full h-auto" />
                 </div>
               )}
               {message.links && (
