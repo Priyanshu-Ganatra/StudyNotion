@@ -12,6 +12,8 @@ import {
   setTotalNoOfLectures,
 } from "../slices/viewCourseSlice"
 import { apiConnector } from "../services/apiConnector"
+import ChatBotTrigger from "../components/core/ViewCourse/ChatBotTrigger"
+import ChatBotModal from "../components/core/ViewCourse/ChatBotModal"
 
 export default function ViewCourse() {
   const BASE_URL = process.env.REACT_APP_BASE_URL
@@ -21,6 +23,7 @@ export default function ViewCourse() {
   const dispatch = useDispatch()
   const [showReviewBtn, setShowReviewBtn] = useState(false)
   const [reviewModal, setReviewModal] = useState(false)
+  const [isChatbotVisible, setIsChatbotVisible] = useState(false);
 
   useEffect(() => {
     ; (async () => {
@@ -50,6 +53,8 @@ export default function ViewCourse() {
           <div className="mx-6">
             <Outlet />
           </div>
+          <ChatBotModal isChatbotVisible={isChatbotVisible} />
+          <ChatBotTrigger isChatbotVisible={isChatbotVisible} className="absolute right-5 bottom-5" onClick={() => setIsChatbotVisible(!isChatbotVisible)} />
         </div>
       </div>
       {reviewModal && <CourseReviewModal setShowReviewBtn={setShowReviewBtn} setReviewModal={setReviewModal} />}
