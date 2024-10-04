@@ -41,7 +41,7 @@ const ChatBotModal = ({ isChatbotVisible }) => {
       setMessages(prev => [...prev, botMessage])
     } catch (error) {
       console.error('Error:', error)
-      setMessages(prev => [...prev, { type: 'bot', content: 'Sorry, I encountered an error. Please try again.' }])
+      setMessages(prev => [...prev, { type: 'bot', content: 'Sorry, I encountered an error or, your query is irrelevant with this course. Please try again.' }])
     } finally {
       setIsLoading(false)
     }
@@ -75,7 +75,7 @@ const ChatBotModal = ({ isChatbotVisible }) => {
               )}
               {message.dataVisualization && (
                 <div className="mt-4">
-                  <h3 className="font-bold">Data Visualization:</h3>
+                  <h3 className="font-bold">Heat map of your query keywords in research papers:</h3>
                   <img src={message.dataVisualization} alt="Data Visualization" className="mt-2 max-w-full h-auto" />
                 </div>
               )}
